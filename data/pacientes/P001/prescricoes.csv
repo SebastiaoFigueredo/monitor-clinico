@@ -1,0 +1,6 @@
+timestamp,medicamento,acao,dose_mg,intervalo_h,via,prescritor
+2026-11-10 09:00:00,ceftriaxona,iniciar,2000,24,IV,Dr. A
+2026-11-10 09:00:00,dipirona,iniciar,1000,6,IV,Dr. A
+2026-11-10 09:00:00,enoxaparina,iniciar,40,24,SC,Dr. A
+2026-11-12 10:00:00,ceftriaxona,suspender,0,24,IV,Dr. B
+2026-11-13 15:00:00,omeprazol,iniciar,40,24,VO,Dr. B

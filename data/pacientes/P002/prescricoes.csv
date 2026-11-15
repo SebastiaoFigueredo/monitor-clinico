@@ -1,0 +1,5 @@
+timestamp,medicamento,acao,dose_mg,intervalo_h,via,prescritor
+2026-11-10 08:00:00,omeprazol,iniciar,40,24,VO,Dra. C
+2026-11-10 08:00:00,dipirona,iniciar,1000,6,VO,Dra. C
+2026-11-10 08:00:00,enalapril,iniciar,10,12,VO,Dra. C
+2026-11-12 08:00:00,dipirona,alterar,1000,8,VO,Dra. C

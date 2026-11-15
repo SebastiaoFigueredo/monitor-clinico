@@ -1,0 +1,69 @@
+{
+  "avaliacao": "validação cruzada 5x agrupada por registro",
+  "n_fragmentos": 1016,
+  "n_registros": 22,
+  "acuracia_6_classes": 0.6190944881889764,
+  "acuracia_nivel_de_risco": 0.7244094488188977,
+  "recall_por_classe": {
+    "fibrilação/flutter ventricular": 0.857566765578635,
+    "taquicardia ventricular polimórfica (torsades de pointes)": 0.7222222222222222,
+    "taquicardia ventricular de alto risco": 0.591715976331361,
+    "arritmia ventricular potencialmente perigosa": 0.5984848484848485,
+    "arritmia supraventricular": 0.3584905660377358,
+    "ritmo sinusal": 0.355
+  },
+  "sensibilidade_arritmia_ventricular": 0.9549295774647887,
+  "especificidade_arritmia_ventricular": 0.738562091503268,
+  "vpp_arritmia_ventricular": 0.8944591029023746,
+  "sensibilidade_ritmo_critico": 0.9480968858131488,
+  "matriz_confusao": [
+    [
+      289,
+      28,
+      18,
+      1,
+      0,
+      1
+    ],
+    [
+      6,
+      52,
+      11,
+      3,
+      0,
+      0
+    ],
+    [
+      19,
+      25,
+      100,
+      19,
+      1,
+      5
+    ],
+    [
+      1,
+      9,
+      18,
+      79,
+      17,
+      8
+    ],
+    [
+      0,
+      1,
+      0,
+      21,
+      38,
+      46
+    ],
+    [
+      2,
+      1,
+      40,
+      15,
+      71,
+      71
+    ]
+  ]
+}

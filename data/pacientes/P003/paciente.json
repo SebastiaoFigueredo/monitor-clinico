@@ -1,0 +1,11 @@
+{
+  "id": "P003",
+  "leito": "303-A",
+  "idade": 79,
+  "motivo": "TVP em anticoagulação; risco de queda",
+  "video": {
+    "tipo": "arquivo",
+    "valor": "../../video/validacao_queda.mp4",
+    "inicio": "2026-11-14T05:00:00"
+  }
+}

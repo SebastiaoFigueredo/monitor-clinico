@@ -1,0 +1,6 @@
+timestamp,medicamento,acao,dose_mg,intervalo_h,via,prescritor
+2026-11-10 09:00:00,heparina,iniciar,5000,12,SC,Dr. D
+2026-11-10 09:00:00,metoprolol,iniciar,50,12,VO,Dr. D
+2026-11-11 09:00:00,heparina,alterar,50000,12,SC,Dr. E
+2026-11-12 11:00:00,cetoprofeno,iniciar,100,12,IV,Dr. E
+2026-11-13 09:00:00,metoprolol,suspender,0,12,VO,Dr. E

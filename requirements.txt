@@ -1,0 +1,21 @@
+# Funciona em CPU com um simples "pip install -r requirements.txt".
+# Para usar GPU NVIDIA, instale ANTES o torch com CUDA:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+torch
+torchvision
+ultralytics>=8.3
+opencv-python>=4.9,<5      # o OpenCV 5 removeu o leitor de modelos Caffe usado pelo backend OpenPose
+numpy
+pandas
+scikit-learn
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+azure-cognitiveservices-speech   # Azure Speech to Text (transcrição das consultas)
+azure-ai-textanalytics           # Azure Text Analytics (sentimento, frases-chave, entidades de saúde)
+anthropic                  # opcional: perguntas em linguagem natural (/perguntar)
+pytest
+httpx
+# faster-whisper           # opcional: transcrição local quando a Azure não está configurada
+reportlab                  # opcional: scripts/gerar_relatorio_pdf.py

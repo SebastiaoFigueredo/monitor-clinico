@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitor Clínico</title>
+<style>
+  :root { --fundo:#f4f6f8; --cartao:#fff; --texto:#1c2430; --suave:#5d6b7c; --borda:#d9e0e7; --destaque:#0b6bcb;
+          --CRITICA:#c62828; --ALTA:#e65100; --MEDIA:#b28704; --BAIXA:#2e7d6b; --INFO:#78869a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fundo:#12171d; --cartao:#1b222b; --texto:#e6ebf1; --suave:#9aa8b8; --borda:#2c3744; --destaque:#5aa9f5;
+            --CRITICA:#ff6b66; --ALTA:#ff9a4d; --MEDIA:#f0c040; --BAIXA:#5cc7ae; --INFO:#8a97a8; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--fundo); color:var(--texto); font:15px/1.45 system-ui, "Segoe UI", sans-serif; }
+  header { padding:14px 20px; border-bottom:1px solid var(--borda); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+  h1 { font-size:19px; margin:0; } h2 { font-size:15px; margin:0 0 10px; }
+  header small, .suave { color:var(--suave); }
+  main { display:grid; grid-template-columns:minmax(260px,330px) 1fr; gap:16px; padding:16px 20px; max-width:1400px; margin:auto; }
+  @media (max-width:820px) { main { grid-template-columns:1fr; padding:12px 16px; } }
+  section, .paciente { background:var(--cartao); border:1px solid var(--borda); border-radius:10px; padding:14px; }
+  .paciente { display:block; width:100%; text-align:left; color:inherit; font:inherit; cursor:pointer; margin-bottom:8px;
+              border-left:6px solid var(--INFO); }
+  .paciente[aria-pressed=true] { outline:2px solid var(--destaque); }
+  .paciente b { font-size:16px; }
+  .selo { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; font-weight:600; color:#fff; }
+  .alerta { border-left:5px solid var(--INFO); padding:9px 12px; margin-bottom:8px; background:var(--fundo); border-radius:6px; }
+  .alerta.reconhecido { opacity:.55; }
+  .alerta p { margin:4px 0; overflow-wrap:anywhere; }
+  .meta { font-size:12.5px; color:var(--suave); }
+  button.acao, #perguntar button { background:var(--destaque); color:#fff; border:0; border-radius:6px; padding:6px 12px; cursor:pointer; font:inherit; }
+  .filtros { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; align-items:center; }
+  select, input[type=text] { font:inherit; padding:6px 8px; border:1px solid var(--borda); border-radius:6px; background:var(--cartao); color:var(--texto); }
+  #perguntar { display:flex; gap:8px; margin-top:8px; } #perguntar input { flex:1; min-width:0; }
+  #resposta { white-space:pre-wrap; margin-top:10px; }
+  table { border-collapse:collapse; width:100%; font-size:13.5px; } td, th { text-align:left; padding:3px 8px 3px 0; }
+  .linha { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:8px 0; }
+  textarea { width:100%; min-height:70px; font:inherit; padding:8px; border:1px solid var(--borda); border-radius:6px; background:var(--cartao); color:var(--texto); }
+  button.sec { background:transparent; color:var(--destaque); border:1px solid var(--destaque); border-radius:6px; padding:6px 12px; cursor:pointer; font:inherit; }
+  button:disabled { opacity:.5; cursor:default; }
+  .ok { color:var(--BAIXA); } .falha { color:var(--CRITICA); }
+  #teste-saida dt { font-weight:600; margin-top:8px; } #teste-saida dd { margin:2px 0 0; overflow-wrap:anywhere; }
+  footer { text-align:center; color:var(--suave); font-size:12.5px; padding:6px 20px 24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Monitor Clínico</h1>
+  <small id="status">carregando…</small>
+</header>
+<main>
+  <div>
+    <h2>Pacientes <span class="suave">(mais grave primeiro)</span></h2>
+    <div id="pacientes"></div>
+    <section>
+      <h2>Perguntar ao assistente</h2>
+      <div class="suave">Ex.: “Quem devo reavaliar primeiro e por quê?”</div>
+      <form id="perguntar"><input type="text" id="pergunta" aria-label="Pergunta" required minlength="3"><button>Enviar</button></form>
+      <div id="resposta"></div>
+    </section>
+  </div>
+  <div>
+    <section style="margin-bottom:16px">
+      <h2>Testar uma consulta <span class="suave">(Azure Speech to Text + Text Analytics)</span></h2>
+      <ul id="azure" class="meta" style="margin:0 0 8px;padding-left:18px"><li>verificando credenciais Azure…</li></ul>
+      <div class="linha">
+        <label>Paciente <input type="text" id="t-pac" value="TESTE" size="8"></label>
+        <button class="sec" id="t-gravar">● Gravar pelo microfone</button>
+        <label class="sec" style="display:inline-block;padding:6px 12px;border:1px solid var(--destaque);border-radius:6px;color:var(--destaque);cursor:pointer">
+          Enviar arquivo de áudio<input type="file" id="t-arq" accept="audio/*" hidden></label>
+      </div>
+      <textarea id="t-texto" aria-label="Texto da consulta" placeholder="…ou cole aqui o texto de uma consulta. Ex.: Doutor, estou com dor no peito e muita falta de ar. Parei de tomar o remédio."></textarea>
+      <div class="linha"><button class="acao" id="t-enviar">Analisar texto</button><span id="t-estado" class="meta"></span></div>
+      <dl id="teste-saida"></dl>
+    </section>
+    <section id="detalhe" hidden><h2 id="det-titulo"></h2><table id="det-tabela"></table></section>
+    <section style="margin-top:16px">
+      <div class="filtros">
+        <h2 style="margin:0;flex:1" id="titulo-alertas">Alertas</h2>
+        <label>Severidade mínima
+          <select id="sev"><option>BAIXA</option><option>MEDIA</option><option>ALTA</option><option>CRITICA</option></select></label>
+        <label><input type="checkbox" id="abertos" checked> só abertos</label>
+      </div>
+      <div id="alertas"></div>
+    </section>
+  </div>
+</main>
+<footer>Protótipo acadêmico de apoio à decisão — os alertas são achados de triagem e não substituem a avaliação da equipe assistencial.</footer>
+<script>
+const $ = id => document.getElementById(id);
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+let selecionado = null, situacao = [];
+const api = (url, opt) => fetch(url, opt).then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e.detail || r.statusText)));
+
+async function atualizar() {
+  try {
+    situacao = await api('/pacientes');
+    const q = new URLSearchParams({severidade_minima: $('sev').value});
+    if (selecionado) q.set('paciente_id', selecionado);
+    if ($('abertos').checked) q.set('status', 'aberto');
+    desenhar(await api('/alertas?' + q));
+    $('status').textContent = 'atualizado às ' + new Date().toLocaleTimeString('pt-BR');
+  } catch (e) { $('status').textContent = 'erro ao atualizar: ' + e; }
+}
+
+function desenhar(alertas) {
+  const lista = $('pacientes'); lista.replaceChildren();
+  for (const p of situacao) {
+    const b = el('button', 'paciente');
+    b.style.borderLeftColor = `var(--${p.pior_severidade})`;
+    b.setAttribute('aria-pressed', selecionado === p.id);
+    b.append(el('b', null, p.id), ' ', el('span', 'suave', p.leito ? 'leito ' + p.leito : ''));
+    b.append(el('div', 'meta', p.motivo || ''));
+    const linha = el('div');
+    for (const [sev, n] of Object.entries(p.por_severidade)) if (n) {
+      const s = el('span', 'selo', `${n} ${sev.toLowerCase()}`); s.style.background = `var(--${sev})`; linha.append(s, ' ');
+    }
+    if (!p.alertas_abertos) linha.append(el('span', 'meta', 'sem alertas abertos'));
+    b.append(linha);
+    b.onclick = () => { selecionado = selecionado === p.id ? null : p.id; atualizar(); };
+    lista.append(b);
+  }
+  const p = situacao.find(x => x.id === selecionado);
+  $('detalhe').hidden = !p;
+  $('titulo-alertas').textContent = p ? `Alertas — ${p.id}` : 'Alertas — todos os pacientes';
+  if (p) {
+    $('det-titulo').textContent = `${p.id} — fontes analisadas`;
+    const t = $('det-tabela'); t.replaceChildren();
+    for (const [fonte, a] of Object.entries(p.analises)) {
+      const tr = el('tr'); tr.append(el('th', null, fonte), el('td', null, `${a.anomalias} anomalia(s)`));
+      let extra = '';
+      if (a.ultima_leitura) { const u = a.ultima_leitura; extra = `última leitura: FC ${u.fc} · PA ${u.pas}/${u.pad} · SpO₂ ${u.spo2}% · FR ${u.fr} · T ${u.temp} °C · NEWS2 ${a.news2_atual}`; }
+      else if (a.features) {
+        extra = `F0 ${a.features.f0_media} Hz · jitter ${a.features.jitter_pct}% · shimmer ${a.features.shimmer_pct}% · HNR ${a.features.hnr_db} dB`;
+        if (a.analise_texto) extra += ` · sentimento ${a.analise_texto.sentimento} (negativo ${Math.round(100 * a.analise_texto.negativo)}%)`;
+        if (a.transcricao) extra += ` · transcrição (${a.transcricao_origem}): “${a.transcricao.slice(0, 220)}${a.transcricao.length > 220 ? '…' : ''}”`;
+      }
+      else if (a.fonte) extra = a.fonte;
+      else if (a.duracao_s) extra = `${a.duracao_s} s de traçado`;
+      tr.append(el('td', 'meta', extra)); t.append(tr);
+    }
+  }
+  const caixa = $('alertas'); caixa.replaceChildren();
+  if (!alertas.length) caixa.append(el('p', 'suave', 'Nenhum alerta para este filtro.'));
+  for (const a of alertas) {
+    const d = el('div', 'alerta' + (a.status === 'reconhecido' ? ' reconhecido' : ''));
+    d.style.borderLeftColor = `var(--${a.severidade})`;
+    const s = el('span', 'selo', a.severidade); s.style.background = `var(--${a.severidade})`;
+    const cab = el('div'); cab.append(s, ' ', el('b', null, `${a.paciente_id} · ${a.origem} · ${a.tipo.replaceAll('_', ' ')}`),
+      ' ', el('span', 'meta', new Date(a.ocorrido_em).toLocaleString('pt-BR') + (a.ocorrencias > 1 ? ` · ${a.ocorrencias} ocorrências` : '')));
+    d.append(cab, el('p', null, a.descricao), el('p', 'meta', `Ação sugerida: ${a.acao_sugerida}`),
+             el('p', 'meta', `Notificar: ${a.destinatarios.join(', ')} · detector: ${a.detector}`));
+    if (a.status === 'aberto') {
+      const b = el('button', 'acao', 'Reconhecer');
+      b.onclick = async () => {
+        const quem = prompt('Seu nome/registro para reconhecer o alerta:'); if (!quem) return;
+        await api(`/alertas/${a.id}/reconhecer`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({profissional: quem})});
+        atualizar();
+      };
+      d.append(b);
+    } else d.append(el('p', 'meta', `Reconhecido por ${a.reconhecido_por}`));
+    caixa.append(d);
+  }
+}
+
+$('perguntar').onsubmit = async ev => {
+  ev.preventDefault();
+  $('resposta').textContent = 'consultando…';
+  try {
+    const r = await api('/perguntar', {method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({pergunta: $('pergunta').value, paciente_id: selecionado})});
+    $('resposta').textContent = r.resposta;
+  } catch (e) { $('resposta').textContent = 'erro: ' + e; }
+};
+// ---------------------------------------------------------------- teste de consulta (áudio/texto)
+async function azureStatus() {
+  const ul = $('azure'); ul.replaceChildren();
+  try {
+    for (const i of await api('/azure/diagnostico')) {
+      const li = el('li', i.ok ? 'ok' : 'falha', `${i.ok ? '✔' : '✖'} ${i.servico}: ${i.mensagem}`); ul.append(li);
+    }
+  } catch (e) { ul.append(el('li', 'falha', 'não foi possível verificar: ' + e)); }
+}
+
+// Converte qualquer áudio que o navegador saiba decodificar (gravação, mp3, m4a, wav…) em WAV PCM 16 kHz mono
+async function paraWav(blob) {
+  const ctx = new AudioContext();
+  const orig = await ctx.decodeAudioData(await blob.arrayBuffer()); ctx.close();
+  const off = new OfflineAudioContext(1, Math.ceil(orig.duration * 16000), 16000);
+  const src = off.createBufferSource(); src.buffer = orig; src.connect(off.destination); src.start();
+  const pcm = (await off.startRendering()).getChannelData(0);
+  const buf = new DataView(new ArrayBuffer(44 + pcm.length * 2));
+  const txt = (o, t) => [...t].forEach((c, i) => buf.setUint8(o + i, c.charCodeAt(0)));
+  txt(0, 'RIFF'); buf.setUint32(4, 36 + pcm.length * 2, true); txt(8, 'WAVEfmt '); buf.setUint32(16, 16, true);
+  buf.setUint16(20, 1, true); buf.setUint16(22, 1, true); buf.setUint32(24, 16000, true); buf.setUint32(28, 32000, true);
+  buf.setUint16(32, 2, true); buf.setUint16(34, 16, true); txt(36, 'data'); buf.setUint32(40, pcm.length * 2, true);
+  pcm.forEach((v, i) => buf.setInt16(44 + i * 2, Math.max(-1, Math.min(1, v)) * 32767, true));
+  return new Blob([buf], {type: 'audio/wav'});
+}
+
+function mostrarTeste(r) {
+  const dl = $('teste-saida'); dl.replaceChildren();
+  const item = (t, v) => { if (v) dl.append(el('dt', null, t), el('dd', null, v)); };
+  item(`Transcrição${r.transcricao_origem ? ' (' + r.transcricao_origem + ')' : ''}`, r.transcricao);
+  const a = r.analise_texto;
+  if (a) {
+    item('Sentimento (Azure Text Analytics)', `${a.sentimento} — positivo ${Math.round(a.positivo * 100)}% · neutro ${Math.round(a.neutro * 100)}% · negativo ${Math.round(a.negativo * 100)}%`);
+    item('Frases negativas', a.frases_negativas.map(f => `“${f.texto}”`).join(' · '));
+    item('Frases-chave', a.frases_chave.join(', '));
+    item('Entidades de saúde', a.entidades_saude.map(e => `${e.texto} [${e.categoria}]${e.negada ? ' (negada)' : ''}`).join(' · '));
+  }
+  if (r.features) item('Biomarcadores vocais', `F0 ${r.features.f0_media} Hz · jitter ${r.features.jitter_pct}% · shimmer ${r.features.shimmer_pct}% · HNR ${r.features.hnr_db} dB · pausas ${Math.round(r.features.fracao_pausa * 100)}%`);
+  item('Alertas gerados', r.alertas_emitidos.length ? r.alertas_emitidos.map(x => `[${x.severidade}] ${x.descricao}`).join('\n') : 'nenhum');
+  dl.lastChild.style.whiteSpace = 'pre-wrap';
+  item('Avisos', (r.avisos || []).join(' · '));
+  atualizar();
+}
+
+async function enviarAudio(blob) {
+  const estado = $('t-estado');
+  try {
+    estado.textContent = 'convertendo para WAV…';
+    const fd = new FormData(); fd.append('arquivo', await paraWav(blob), 'consulta.wav');
+    estado.textContent = 'transcrevendo e analisando…';
+    mostrarTeste(await api(`/pacientes/${encodeURIComponent($('t-pac').value || 'TESTE')}/audio`, {method: 'POST', body: fd}));
+    estado.textContent = 'pronto';
+  } catch (e) { estado.textContent = 'erro: ' + (e.message || e); }
+}
+
+let gravador = null;
+$('t-gravar').onclick = async () => {
+  if (gravador) { gravador.stop(); return; }
+  try {
+    const fluxo = await navigator.mediaDevices.getUserMedia({audio: true});
+    const partes = []; gravador = new MediaRecorder(fluxo);
+    gravador.ondataavailable = e => partes.push(e.data);
+    gravador.onstop = () => { fluxo.getTracks().forEach(t => t.stop()); gravador = null; $('t-gravar').textContent = '● Gravar pelo microfone'; enviarAudio(new Blob(partes)); };
+    gravador.start(); $('t-gravar').textContent = '■ Parar e analisar'; $('t-estado').textContent = 'gravando…';
+  } catch (e) { $('t-estado').textContent = 'microfone indisponível: ' + e.message; }
+};
+$('t-arq').onchange = e => { if (e.target.files[0]) enviarAudio(e.target.files[0]); e.target.value = ''; };
+$('t-enviar').onclick = async () => {
+  const texto = $('t-texto').value.trim(); if (texto.length < 3) return;
+  $('t-estado').textContent = 'analisando…';
+  try {
+    const r = await api(`/pacientes/${encodeURIComponent($('t-pac').value || 'TESTE')}/transcricao`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({texto})});
+    mostrarTeste({...r, transcricao: texto, transcricao_origem: 'texto digitado'}); $('t-estado').textContent = 'pronto';
+  } catch (e) { $('t-estado').textContent = 'erro: ' + e; }
+};
+azureStatus();
+
+$('sev').onchange = $('abertos').onchange = atualizar;
+atualizar(); setInterval(atualizar, 15000);
+</script>
+</body>
+</html>

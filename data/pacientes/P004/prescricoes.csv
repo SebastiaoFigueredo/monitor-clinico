@@ -1,0 +1,6 @@
+timestamp,medicamento,acao,dose_mg,intervalo_h,via,prescritor
+2026-11-10 09:00:00,amiodarona,iniciar,200.0,8,VO,Dra. F
+2026-11-10 09:00:00,enoxaparina,iniciar,60.0,12,SC,Dra. F
+2026-11-11 20:00:00,haloperidol,iniciar,2.5,8,IV,Dr. G
+2026-11-12 09:00:00,morfina,iniciar,5.0,4,IV,Dr. G
+2026-11-12 21:00:00,tramadol,iniciar,100.0,8,IV,Dr. H

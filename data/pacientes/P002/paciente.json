@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "leito": "302-B",
+  "idade": 54,
+  "motivo": "pós-operatório sem intercorrências (controle)",
+  "video": {
+    "tipo": "cenario",
+    "valor": "normal",
+    "inicio": "2026-11-14T06:00:00"
+  },
+  "ecg_fs": 360,
+  "ecg_inicio": "2026-11-14T07:00:00"
+}

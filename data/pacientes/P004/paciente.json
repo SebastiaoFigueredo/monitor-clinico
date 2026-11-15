@@ -1,0 +1,13 @@
+{
+  "id": "P004",
+  "leito": "304-B",
+  "idade": 68,
+  "motivo": "FA em amiodarona; investigação neurológica",
+  "video": {
+    "tipo": "cenario",
+    "valor": "agitacao",
+    "inicio": "2026-11-14T03:00:00"
+  },
+  "ecg_fs": 360,
+  "ecg_inicio": "2026-11-14T07:00:00"
+}

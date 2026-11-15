@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+outputs/
+data/falas/
+models/yolov8*.pt
+models/openpose/
