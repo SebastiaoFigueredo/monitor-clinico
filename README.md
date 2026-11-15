@@ -43,6 +43,12 @@ movim. ─► series/movimentacao.py ──────────────�
 **Jeito rápido (Windows):** dois cliques em `iniciar.bat` — cria o ambiente, instala tudo, confere as
 credenciais Azure e abre o painel. Para configurar a Azure do zero, siga o [GUIA_AZURE.md](GUIA_AZURE.md).
 
+O repositório já traz o modelo de ECG treinado (`models/ecg_cnn.pt`) e os pacientes fictícios
+(`data/pacientes`), então os passos de treino e geração de dados abaixo são opcionais. Para retreinar o ECG,
+baixe a base [ECG Fragment Database for the Exploration of Dangerous Arrhythmia](https://doi.org/10.13026/kpfg-xs25)
+da PhysioNet e extraia ao lado da pasta do projeto (ou aponte `ECG_DATASET` no `.env`). Os pesos do YOLOv8
+são baixados automaticamente na primeira execução.
+
 Passo a passo manual:
 
 ```powershell
